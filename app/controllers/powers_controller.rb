@@ -1,18 +1,32 @@
 class PowersController < ApplicationController
     skip_before_action :verify_authenticity_token, only: [:update] # Skip CSRF protection for the update action
+    def index
+      @powers = Power.all
   
-    def update
-        power = Power.find_by(id: params[:id])
-        if power
-          if power.update(power_params)
-            render json: power_json(power)
-          else
-            render json: { errors: power.errors.full_messages }, status: :unprocessable_entity
-          end
-        else
-          render json: { error: 'Power not found' }, status: :not_found
-        end
+      render json: @powers, only: [:id, :name, :description]
+    end
+    def show
+      @power = Power.find_by(id: params[:id])
+  
+      if @power
+        render json: @power, only: [:id, :name, :description]
+      else
+        render json: { error: "Power not found" }, status: :not_found
       end
+    end
+    def update
+      @power = Power.find_by(id: params[:id])
+  
+      if @power
+        if @power.update(power_params)
+          render json: @power.slice(:id, :name, :description)
+        else
+          render json: { errors: @power.errors.full_messages }, status: :unprocessable_entity
+        end
+      else
+        render json: { error: "Power not found" }, status: :not_found
+      end
+    end
     
       private
     
